@@ -15,36 +15,136 @@
 
 /**
  * A logger.
+ *
+ * @example
+ * ```
+ * import log, { LogType } from "@egomobile/log"
+ *
+ * // filter: no debug or trace
+ * log.filter((type: LogType, args: any[]) => type <= LogType.Info)
+ *
+ * // add one or more custom middlewares
+ * log.use((type: LogType, args: any[]) => {
+ *   // your code
+ * })
+ *
+ * // 'log' uses console by default
+ * log("foo") // default: debug
+ * log.debug("foo") // debug
+ * log.error("foo") // error
+ * log.warn("foo") // warning
+ * log.info("foo") // information
+ * log.trace("foo") // trace
+ * ```
  */
 export interface ILogger extends LogAction {
     /**
      * Write DEBUG message.
+     *
+     * @example
+     * ```
+     * import log from '@egomobile/log'
+     *
+     * log.debug('foo')
+     * ```
      */
     debug: LogAction;
     /**
      * Write ERROR message.
+     *
+     * @example
+     * ```
+     * import log from '@egomobile/log'
+     *
+     * log.error('foo')
+     * ```
      */
     error: LogAction;
     /**
+     * Sets a new log filter.
+     *
+     * @example
+     * ```
+     * import log, { LogType } from '@egomobile/log'
+     *
+     * log.filter((type: LogType, args: any[]) => {
+     *   // no debug or trace
+     *   return type <= LogType.Info
+     * })
+     * ```
+     *
+     * @param {LoggerFilter|undefined|null} newFilter The new filter.
+     *
+     * @returns {this}
+     *
+     * @throws LoggerMiddleware Argument is not (null) and not (undefined) and no function.
+     */
+    filter(newFilter: LoggerFilter | undefined | null): this;
+    /**
      * Write INFO message.
+     *
+     * @example
+     * ```
+     * import log from '@egomobile/log'
+     *
+     * log.info('foo')
+     * ```
      */
     info: LogAction;
     /**
      * Resets that instance.
+     *
+     * @example
+     * ```
+     * import log, { LogType } from '@egomobile/log'
+     *
+     * log.reset().use((type: LogType, args: any[]) => {
+     *   // your code here
+     * })
+     * ```
+     *
+     * @returns {this}
      */
     reset(): this;
     /**
      * Write TRACE message.
+     *
+     * @example
+     * ```
+     * import log from '@egomobile/log'
+     *
+     * log.trace('foo')
+     * ```
      */
     trace: LogAction;
     /**
      * Adds one or more middlewares.
      *
+     * @example
+     * ```
+     * import log, { LogType } from '@egomobile/log'
+     *
+     * log.use((type: LogType, args: any[]) => {
+     *   // your code here
+     * })
+     * ```
+     *
      * @param {LoggerMiddleware[]} [middlewares] One or more middlewares to add.
+     *
+     * @returns {this}
+     *
+     * @throws LoggerMiddleware At least one element is not a function.
      */
     use(...middlewares: LoggerMiddleware[]): this;
     /**
      * Write WARNING message.
+     *
+     * @example
+     * ```
+     * import log from '@egomobile/log'
+     *
+     * log.warn('foo')
+     * ```
      */
     warn: LogAction;
 }
@@ -61,8 +161,20 @@ export type LogAction = (...args: any[]) => void;
  *
  * @param {LogType} type The type.
  * @param {any[]} args The submitted arguments.
+ *
+ * @returns {any} If falsy nothing is logged.
+ */
+export type LoggerFilter = (type: LogType, args: any[]) => any;
+
+/**
+ * A logger middleware.
+ *
+ * @param {LogType} type The type.
+ * @param {any[]} args The submitted arguments.
  */
 export type LoggerMiddleware = (type: LogType, args: any[]) => void;
+
+const defaultFilter: LoggerFilter = () => true;
 
 /**
  * A log type.
@@ -97,16 +209,42 @@ export enum LogType {
 /**
  * Creates a new logger instance.
  *
+ * @example
+ * ```
+ * import { consoleLogger, createLogger, LogType } from "@egomobile/log"
+ *
+ * // create custom logger
+ * const myLogger = createLogger()
+ *
+ * // add build-in middleware
+ * myLogger.use(consoleLogger())
+ *
+ * // add one or more custom middlewares
+ * // for your custom logger
+ * myLogger.use((type: LogType, args: any[]) => {
+ *   // your code
+ * })
+ *
+ * // start logging
+ * myLogger("foo")
+ * myLogger.error("bar")
+ * ```
+ *
  * @returns {ILogger} The new instance.
  */
 export function createLogger(): ILogger {
+    let filter = defaultFilter;
     let middlewares: LoggerMiddleware[] = [];
     const doLog: LoggerMiddleware = (type, args) => {
-        middlewares.forEach((mw) => {
-            try {
-                mw(type, args);
-            } catch { }
-        });
+        try {
+            if (filter(type, args)) {
+                middlewares.forEach((mw) => {
+                    try {
+                        mw(type, args);
+                    } catch { /* ignore */ }
+                });
+            }
+        } catch { /* ignore */ }
     };
 
     // default
@@ -137,7 +275,22 @@ export function createLogger(): ILogger {
         doLog(LogType.Warn, args);
     };
 
+    newLogger.filter = (newFilter) => {
+        if (typeof newFilter === 'undefined' && newFilter === null) {
+            filter = defaultFilter;  // reset
+        } else {
+            if (typeof newFilter !== 'function') {
+                throw new TypeError('newFilter must be function');
+            }
+
+            filter = newFilter;
+        }
+
+        return newLogger;
+    };
+
     newLogger.reset = () => {
+        filter = defaultFilter;
         middlewares = [];
 
         return newLogger;
@@ -148,6 +301,8 @@ export function createLogger(): ILogger {
             throw new TypeError('All items in middleware must be functions');
         }
 
+        // create copies of middleware functions
+        // binded to logger instance
         middlewares.push(...middlewaresToAdd.map(mw => mw.bind(newLogger)));
 
         return newLogger;

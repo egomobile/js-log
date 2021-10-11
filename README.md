@@ -19,6 +19,14 @@ npm install --save @egomobile/log
 ```typescript
 import log, { LogType } from "@egomobile/log";
 
+// filter: no debug or trace
+log.filter((type: LogType, args: any[]) => type <= LogType.Info);
+
+// add one or more custom middlewares
+log.use((type: LogType, args: any[]) => {
+  // your code
+});
+
 // 'log' uses console by default
 log("foo"); // default: debug
 log.debug("foo"); // debug
@@ -26,11 +34,6 @@ log.error("foo"); // error
 log.warn("foo"); // warning
 log.info("foo"); // information
 log.trace("foo"); // trace
-
-// add one or more custom middlewares
-log.use((type: LogType, args: any[]) => {
-  // your code
-});
 ```
 
 ## Documentation
