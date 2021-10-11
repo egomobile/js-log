@@ -2,7 +2,7 @@
 [![last build](https://img.shields.io/github/workflow/status/egomobile/js-log/Publish)](https://github.com/egomobile/js-log/actions?query=workflow%3APublish)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=flat-square)](https://github.com/egomobile/js-log/pulls)
 
-# js-log
+# @egomobile/log
 
 > A logging framework written for [JavaScript](https://developer.mozilla.org/en-US/docs/Web/JavaScript) and in [TypeScript](https://www.typescriptlang.org/).
 
