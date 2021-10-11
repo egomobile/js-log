@@ -30,9 +30,19 @@ export interface ILogger extends LogAction {
      */
     info: LogAction;
     /**
+     * Resets that instance.
+     */
+    reset(): this;
+    /**
      * Write TRACE message.
      */
     trace: LogAction;
+    /**
+     * Adds one or more middlewares.
+     *
+     * @param {LoggerMiddleware[]} [middlewares] One or more middlewares to add.
+     */
+    use(...middlewares: LoggerMiddleware[]): this;
     /**
      * Write WARNING message.
      */
@@ -47,38 +57,113 @@ export interface ILogger extends LogAction {
 export type LogAction = (...args: any[]) => void;
 
 /**
+ * A logger middleware.
+ *
+ * @param {LogType} type The type.
+ * @param {any[]} args The submitted arguments.
+ */
+export type LoggerMiddleware = (type: LogType, args: any[]) => void;
+
+/**
+ * A log type.
+ */
+export enum LogType {
+    /**
+     * Default
+     */
+    Default = 0,
+    /**
+     * Error
+     */
+    Error,
+    /**
+     * Warning
+     */
+    Warn,
+    /**
+     * Information
+     */
+    Info,
+    /**
+     * Debug
+     */
+    Debug,
+    /**
+     * Trace
+     */
+    Trace,
+}
+
+/**
  * Creates a new logger instance.
  *
  * @returns {ILogger} The new instance.
  */
 export function createLogger(): ILogger {
+    let middlewares: LoggerMiddleware[] = [];
+    const doLog: LoggerMiddleware = (type, args) => {
+        middlewares.forEach((mw) => {
+            try {
+                mw(type, args);
+            } catch { }
+        });
+    };
+
     // default
     const newLogger: ILogger = function (...args: any[]) {
-        console.log(...args);
+        doLog(LogType.Default, args);
     } as any;
 
     // debug
     newLogger.debug = function (...args: any[]) {
-        console.debug(...args);
+        doLog(LogType.Debug, args);
     };
 
     newLogger.error = function (...args: any[]) {
-        console.error(...args);
+        doLog(LogType.Error, args);
     };
 
     newLogger.info = function (...args: any[]) {
-        console.info(...args);
+        doLog(LogType.Info, args);
     };
 
     // trace
     newLogger.trace = function (...args: any[]) {
-        console.trace(...args);
+        doLog(LogType.Trace, args);
     };
 
     // warn
     newLogger.warn = function (...args: any[]) {
-        console.warn(...args);
+        doLog(LogType.Warn, args);
+    };
+
+    newLogger.reset = () => {
+        middlewares = [];
+
+        return newLogger;
+    };
+
+    newLogger.use = (...middlewaresToAdd: LoggerMiddleware[]) => {
+        if (middlewaresToAdd.some(mw => typeof mw !== 'function')) {
+            throw new TypeError('All items in middleware must be functions');
+        }
+
+        middlewares.push(...middlewaresToAdd.map(mw => mw.bind(newLogger)));
+
+        return newLogger;
     };
 
     return newLogger;
 }
+
+/**
+ * The global, default logger.
+ */
+export const log = createLogger();
+
+// setup default middlewares
+log.use(require('./middlewares/console').consoleLogger());
+
+export default log;
+
+export * from './middlewares';

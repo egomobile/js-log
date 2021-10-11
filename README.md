@@ -16,7 +16,22 @@ npm install --save @egomobile/log
 
 ## Usage
 
-@TODO
+```typescript
+import log, { LogType } from "@egomobile/log";
+
+// 'log' uses console by default
+log("foo"); // default: debug
+log.debug("foo"); // debug
+log.error("foo"); // error
+log.warn("foo"); // warning
+log.info("foo"); // information
+log.trace("foo"); // trace
+
+// add one or more custom middlewares
+log.use((type: LogType, args: any[]) => {
+  // your code
+});
+```
 
 ## Documentation
 
