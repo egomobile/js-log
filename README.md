@@ -2,7 +2,7 @@
 [![last build](https://img.shields.io/github/workflow/status/egomobile/js-log/Publish)](https://github.com/egomobile/js-log/actions?query=workflow%3APublish)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=flat-square)](https://github.com/egomobile/js-log/pulls)
 
-# js-log
+# @egomobile/log
 
 > A logging framework written for [JavaScript](https://developer.mozilla.org/en-US/docs/Web/JavaScript) and in [TypeScript](https://www.typescriptlang.org/).
 
@@ -19,6 +19,14 @@ npm install --save @egomobile/log
 ```typescript
 import log, { LogType } from "@egomobile/log";
 
+// filter: no debug or trace
+log.filter((type: LogType, args: any[]) => type <= LogType.Info);
+
+// add one or more custom middlewares
+log.use((type: LogType, args: any[]) => {
+  // your code
+});
+
 // 'log' uses console by default
 log("foo"); // default: debug
 log.debug("foo"); // debug
@@ -26,11 +34,6 @@ log.error("foo"); // error
 log.warn("foo"); // warning
 log.info("foo"); // information
 log.trace("foo"); // trace
-
-// add one or more custom middlewares
-log.use((type: LogType, args: any[]) => {
-  // your code
-});
 ```
 
 ## Documentation

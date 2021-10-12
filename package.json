@@ -1,6 +1,6 @@
 {
     "name": "@egomobile/log",
-    "version": "0.1.1",
+    "version": "0.2.0",
     "description": "Logger framework written for JavaScript.",
     "main": "lib/index.js",
     "engines": {
@@ -27,6 +27,8 @@
         "ts",
         "javascript",
         "typescript",
+        "middleware",
+        "filter",
         "ego"
     ],
     "author": "Next.e.GO Mobile SE, Aachen, Germany",
@@ -49,7 +51,7 @@
         "nodemon": "^2.0.13",
         "ts-node": "^10.2.1",
         "tslint": "^6.1.3",
-        "typedoc": "^0.22.4",
+        "typedoc": "^0.22.5",
         "typescript": "^4.4.3"
     }
 }
