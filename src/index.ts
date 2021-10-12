@@ -276,7 +276,7 @@ export function createLogger(): ILogger {
     };
 
     newLogger.filter = (newFilter) => {
-        if (typeof newFilter === 'undefined' && newFilter === null) {
+        if (typeof newFilter === 'undefined' || newFilter === null) {
             filter = defaultFilter;  // reset
         } else {
             if (typeof newFilter !== 'function') {
