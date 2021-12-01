@@ -181,9 +181,9 @@ export function useFallback(mainLogger: AsyncLoggerMiddleware, firstFallback: As
  * ```
  * import log, { consoleLogger, LoggerFilter, LogType, useFilter } from "@egomobile/log"
  *
- * const mySpecialFilter: AsyncLoggerMiddleware = (type, args) => {
+ * const mySpecialFilter: LoggerFilter = (type, args) => {
  *   // return a truely value to indicate
- *   return type >= LogType.Debug //
+ *   return type >= LogType.Debug &&
  *     process.env.NODE_ENV !== 'production'
  * }
  *
