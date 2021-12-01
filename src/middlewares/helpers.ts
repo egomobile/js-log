@@ -54,7 +54,7 @@ import type { AsyncLoggerMiddleware, LoggerFilter, LoggerMiddleware, NextFunctio
  *   done()
  * }
  *
- * log.use(useAll(myFirstMiddleware, mySecondMiddleware, myThirdMiddleware))
+ * log.use( useAll(myFirstMiddleware, mySecondMiddleware, myThirdMiddleware) )
  *
  * log('foo')
  * ```
@@ -127,7 +127,7 @@ export function useAll(firstLogger: AsyncLoggerMiddleware, ...moreLoggers: Async
  *   done()
  * }
  *
- * log.use(useFallback(myFirstMiddleware, mySecondMiddleware, myThirdMiddleware))
+ * log.use( useFallback(myFirstMiddleware, mySecondMiddleware, myThirdMiddleware) )
  *
  * log('foo')
  * ```
