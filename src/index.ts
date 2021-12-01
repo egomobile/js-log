@@ -14,6 +14,15 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 /**
+ * An any logger middleware.
+ *
+ * @param {LogType} type The type.
+ * @param {any[]} args The submitted arguments.
+ * @param {NextFunction} next The next function.
+ */
+export type AsyncLoggerMiddleware = (type: LogType, args: any[], next: NextFunction) => void;
+
+/**
  * A logger.
  *
  * @example
@@ -173,6 +182,13 @@ export type LoggerFilter = (type: LogType, args: any[]) => any;
  * @param {any[]} args The submitted arguments.
  */
 export type LoggerMiddleware = (type: LogType, args: any[]) => void;
+
+/**
+ * A 'next function'.
+ *
+ * @param {any} [error] The error, that indicates to stop or the error from previois call.
+ */
+export type NextFunction = (error?: any) => any;
 
 const defaultFilter: LoggerFilter = () => true;
 
